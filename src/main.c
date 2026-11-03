@@ -11,10 +11,13 @@ int main()
     while (true)
     {
         printPrompt();
-    
+
+
         line = readLine();
+        printf("line read\n");
+        printf("line = %s\n", line);
+
         args = parseLine(line);
-        
         printf("line:\n%s", line);
         
         char **ptr = args;
