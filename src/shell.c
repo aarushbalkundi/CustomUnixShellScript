@@ -21,7 +21,7 @@ char *readLine()
         return NULL;          
     }
 
-    // line[strcspn(line, "\n")] = '\0';   // remove the \n character at the end of the input
+    line[strcspn(line, "\n")] = '\0';   // remove the \n character at the end of the input
     return line;
 }
 
@@ -29,7 +29,7 @@ char *readLine()
 
 char **parseLine(char *line)
 {
-    char *lineCopy = malloc(sizeof(line) + 1);
+    char *lineCopy = malloc(strlen(line) + 1);
     strcpy(lineCopy, line);
 
     char *token = strtok(lineCopy, " ");
@@ -41,21 +41,35 @@ char **parseLine(char *line)
     int numArgs = 0;
     while (numArgs < ARG_LIMIT && token != NULL)
     {
-        args[numArgs] = malloc(sizeof(token)+1);
+        args[numArgs] = malloc(strlen(token)+1);
         
         if (args[numArgs] == NULL)
         {
             free(args);
         }
         strcpy(args[numArgs], token);
+        // printf("arg%d = %s\n", numArgs, args[numArgs]);
         token = strtok(NULL, " ");
         numArgs ++;
     }
 
     free(lineCopy);
-    free(args);
     
     return args;
 }
 
 
+
+int checkBuiltIn(const char *command)
+{
+    const char *builtins[] = {"exit", "cd", "pwd", NULL};
+
+    for (int i = 0; i<3; i++)
+    {
+        if (strcmp(builtins[i], command) == 0)
+        {
+            return 1;
+        }
+    } 
+    return 0;
+}

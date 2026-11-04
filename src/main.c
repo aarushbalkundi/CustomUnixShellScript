@@ -20,6 +20,16 @@ int main()
         args = parseLine(line);
         printf("line:\n%s", line);
         
+        int i = 0;
+        while (args[i]!=NULL)
+        {
+            printf("args = %s\n", args[i]);
+            i++;
+        }
+
+        int a = checkBuiltIn(args[0]);
+
+        printf("builtin = %d\n", a);
 
         //processing and execution of command to be done here
 

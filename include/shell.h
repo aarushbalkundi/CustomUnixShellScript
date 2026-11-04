@@ -18,3 +18,4 @@ char *readLine();
 char **parseLine(char *line);
 
 
+int checkBuiltIn(const char *command);
