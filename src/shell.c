@@ -21,53 +21,55 @@ char *readLine()
         return NULL;          
     }
 
-    // line[strcspn(line, "\n")] = '\0';   // remove the \n character at the end of the input
+    line[strcspn(line, "\n")] = '\0';   // remove the \n character at the end of the input
     return line;
 }
 
 
 
-/*
-3. char **parse_line(char *line){
-Make a copy of the line (strtok modifies the string)
-Tokenize each argument using strtok. Split by white space or tab or new
-line
-char *token = strtok(line_copy, “ \t\n”);
-while (token != NULL && num_args <MAX_ARGS -1)
- //allocate memory 
-args[num_args] = malloc(strlen(token)+1);
-copy token
-strcpy(args[num_args], token);
-num_args++;
-token = strtok(NULL, “ \t\n”);
-}
-args[num_args] = NULL;
-free(line_copy);
-return args;
-}
-*/
-
 char **parseLine(char *line)
 {
-    char *lineCopy = line;
+    char *lineCopy = malloc(strlen(line) + 1);
+    strcpy(lineCopy, line);
+
     char *token = strtok(lineCopy, " ");
 
-    int numArgs = 1;
-    char **args;
+    char **args = malloc(sizeof(lineCopy) * ARG_LIMIT);
     
-    args[0] = malloc(strlen(token)+1);
-    args[0] = token;
 
-    while (numArgs < 10)
+    
+    int numArgs = 0;
+    while (numArgs < ARG_LIMIT && token != NULL)
     {
-        token = strtok(NULL, " ");
         args[numArgs] = malloc(strlen(token)+1);
+        
+        if (args[numArgs] == NULL)
+        {
+            free(args);
+        }
         strcpy(args[numArgs], token);
-        printf("%s", token);
+        // printf("arg%d = %s\n", numArgs, args[numArgs]);
+        token = strtok(NULL, " ");
+        numArgs ++;
     }
 
+    free(lineCopy);
+    
     return args;
-
 }
 
 
+
+int checkBuiltIn(const char *command)
+{
+    const char *builtins[] = {"exit", "cd", "pwd", NULL};
+
+    for (int i = 0; i<3; i++)
+    {
+        if (strcmp(builtins[i], command) == 0)
+        {
+            return 1;
+        }
+    } 
+    return 0;
+}

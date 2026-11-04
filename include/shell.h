@@ -10,6 +10,7 @@
 
 #define CHAR_LIMIT 1024
 
+#define ARG_LIMIT 20
 
 // input handling functions
 void printPrompt();
@@ -17,3 +18,4 @@ char *readLine();
 char **parseLine(char *line);
 
 
+int checkBuiltIn(const char *command);

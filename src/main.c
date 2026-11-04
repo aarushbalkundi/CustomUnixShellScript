@@ -11,19 +11,25 @@ int main()
     while (true)
     {
         printPrompt();
-    
+
+
         line = readLine();
+        printf("line read\n");
+        printf("line = %s\n", line);
+
         args = parseLine(line);
-        
         printf("line:\n%s", line);
         
-        char **ptr = args;
         int i = 0;
-        while (ptr[i]!=NULL)
+        while (args[i]!=NULL)
         {
-            printf("%s", ptr[i]);
+            printf("args = %s\n", args[i]);
             i++;
         }
+
+        int a = checkBuiltIn(args[0]);
+
+        printf("builtin = %d\n", a);
 
         //processing and execution of command to be done here
 
