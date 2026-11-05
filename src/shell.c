@@ -73,3 +73,37 @@ int checkBuiltIn(const char *command)
     } 
     return 0;
 }
+
+
+//need to implement later
+int checkGlob(char **args)
+{
+    return 0;
+}
+
+void executeExternal(char **args)
+{
+    if (!checkGlob(args))
+    {
+        pid_t pid = fork();
+        if (pid < 0)
+        {
+            perror("Failed to fork");
+        }
+
+        if (pid == 0)
+        {
+            //child process
+            execvp(args[0], args);
+        }
+        else
+        {
+            //parent process
+            int status;
+            if(waitpid(pid, &status, 0) == -1)
+            {
+                perror("child did not return");
+            }
+        }
+    }
+}
