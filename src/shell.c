@@ -160,4 +160,5 @@ int executeInternal(char *command, char **args)
         printf("%s\n", cwd);
         return 1;   
     }
+    return 1;
 }

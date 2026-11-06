@@ -27,7 +27,7 @@ int main()
         //     i++;
         // }
 
-        int a = checkBuiltIn(args[0]);
+        // int a = checkBuiltIn(args[0]);
 
         // printf("builtin = %d\n", a);
 
