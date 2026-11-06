@@ -91,11 +91,11 @@ int checkGlob(char **args)
             if (strchr(args[i], globChars[j]) == NULL)
             {
                 // printf("globbing not present\n");
-                return 1;
+                return 0;
             }
         }
     }
-    return 0;
+    return 1;
 }
 
 void executeExternal(char **args)
