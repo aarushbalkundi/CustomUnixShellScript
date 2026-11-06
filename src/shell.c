@@ -111,3 +111,36 @@ void executeExternal(char **args)
         }
     }
 }
+
+
+
+int executeInternal(char *command, char **args)
+{
+    if (strcmp(command, "exit") == 0)
+    {
+        printf("Farewell\n");
+        exit(0);
+    }
+
+    else if (strcmp(command, "cd") == 0)
+    {
+        char *path = args[1];
+        if(path == NULL)
+        {
+            path = getenv("HOME");
+        }
+        if (chdir(path) != 0)
+        {
+            printf("path does not exist:%s  ", path);
+            return -1;
+        }
+    }
+
+    else if(strcmp(command, "pwd") == 0)
+    {
+        char cwd[1024];
+        getcwd(cwd, sizeof(cwd));
+        printf("%s\n", cwd);
+        return 1;   
+    }
+}
