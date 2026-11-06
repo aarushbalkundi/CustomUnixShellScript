@@ -4,6 +4,10 @@
 
 void printPrompt()
 {
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    printf("%s", cwd);
+    // return 1 /* continue running
     printf("-->");
     fflush(stdout);  
 }
