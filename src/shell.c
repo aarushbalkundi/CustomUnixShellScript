@@ -1,6 +1,6 @@
 // #include "shell.h"
 #include "../include/shell.h"
-
+#include <glob.h>
 
 void printPrompt()
 {
@@ -82,12 +82,25 @@ int checkBuiltIn(const char *command)
 //need to implement later
 int checkGlob(char **args)
 {
+    char globChars[3] = {'*', '?', '['};
+
+    for (int i = 0; args[i] != NULL; i++)
+    {
+        for (int j = 0; j<=2; j++)
+        {
+            if (strchr(args[i], globChars[j]) == NULL)
+            {
+                // printf("globbing not present\n");
+                return 1;
+            }
+        }
+    }
     return 0;
 }
 
 void executeExternal(char **args)
 {
-    if (!checkGlob(args))
+    if (checkGlob(args) == 0)
     {
         pid_t pid = fork();
         if (pid < 0)
@@ -110,8 +123,12 @@ void executeExternal(char **args)
             }
         }
     }
+    else
+    {
+        printf("globbing not implemented yet\n");
+        
+    }
 }
-
 
 
 int executeInternal(char *command, char **args)
