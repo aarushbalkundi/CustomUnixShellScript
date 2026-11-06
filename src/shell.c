@@ -1,6 +1,6 @@
 // #include "shell.h"
 #include "../include/shell.h"
-
+#include <glob.h>
 
 void printPrompt()
 {
@@ -82,12 +82,25 @@ int checkBuiltIn(const char *command)
 //need to implement later
 int checkGlob(char **args)
 {
+    char globChars[3] = {'*', '?', '['};
+
+    for (int i = 0; args[i] != NULL; i++)
+    {
+        for (int j = 0; j<=2; j++)
+        {
+            if (strchr(args[i], globChars[j]) == NULL)
+            {
+                // printf("globbing not present\n");
+                return 1;
+            }
+        }
+    }
     return 0;
 }
 
 void executeExternal(char **args)
 {
-    if (!checkGlob(args))
+    if (checkGlob(args) == 0)
     {
         pid_t pid = fork();
         if (pid < 0)
@@ -109,5 +122,42 @@ void executeExternal(char **args)
                 perror("child did not return");
             }
         }
+    }
+    else
+    {
+        printf("globbing not implemented yet\n");
+        
+    }
+}
+
+
+int executeInternal(char *command, char **args)
+{
+    if (strcmp(command, "exit") == 0)
+    {
+        printf("Farewell\n");
+        exit(0);
+    }
+
+    else if (strcmp(command, "cd") == 0)
+    {
+        char *path = args[1];
+        if(path == NULL)
+        {
+            path = getenv("HOME");
+        }
+        if (chdir(path) != 0)
+        {
+            printf("path does not exist:%s  ", path);
+            return -1;
+        }
+    }
+
+    else if(strcmp(command, "pwd") == 0)
+    {
+        char cwd[1024];
+        getcwd(cwd, sizeof(cwd));
+        printf("%s\n", cwd);
+        return 1;   
     }
 }

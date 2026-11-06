@@ -36,6 +36,11 @@ int main()
         {
             executeExternal(args);
         }
+        else
+        {
+            // printf("inside internal execution\n");
+            executeInternal(args[0], args);
+        }
 
         free(line);
         // free(args);

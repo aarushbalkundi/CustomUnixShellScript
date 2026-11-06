@@ -18,5 +18,6 @@ char *readLine();
 char **parseLine(char *line);
 
 
-void executeExternal(char **args);
 int checkBuiltIn(const char *command);
+void executeExternal(char **args);
+int executeInternal(char *command, char **args);
