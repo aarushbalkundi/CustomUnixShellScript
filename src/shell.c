@@ -4,12 +4,8 @@
 
 void printPrompt()
 {
-    char cwd[1024];
-    getcwd(cwd, sizeof(cwd));
-    printf("%s", cwd);
-    // return 1 /* continue running
-    printf("-->");
-    fflush(stdout);  
+    printf("myshell--> ");
+    fflush(stdout);
 }
 
 char *readLine()
@@ -22,7 +18,7 @@ char *readLine()
 
     if (fgets(line, CHAR_LIMIT, stdin) == NULL) {
         free(line);
-        return NULL;          
+        return NULL;
     }
 
     line[strcspn(line, "\n")] = '\0';   // remove the \n character at the end of the input
@@ -33,32 +29,53 @@ char *readLine()
 
 char **parseLine(char *line)
 {
+
+    if(line == NULL){
+        return NULL;
+
+    }
+
     char *lineCopy = malloc(strlen(line) + 1);
+
+    if(lineCopy == NULL){
+        return NULL;
+    }
     strcpy(lineCopy, line);
 
     char *token = strtok(lineCopy, " ");
 
-    char **args = malloc(sizeof(lineCopy) * ARG_LIMIT);
-    
+    char **args = calloc(ARG_LIMIT + 1, sizeof(char *));
 
-    
+    if(args == NULL){
+        free(lineCopy);
+        return NULL;
+    }
+
+
+
     int numArgs = 0;
     while (numArgs < ARG_LIMIT && token != NULL)
     {
         args[numArgs] = malloc(strlen(token)+1);
-        
-        if (args[numArgs] == NULL)
-        {
+
+        if (args[numArgs] == NULL){
+
+            for (int i = 0; i < numArgs; i++){
+                free(args[i]);
+            }
             free(args);
+            free(lineCopy);
+            return NULL;
         }
         strcpy(args[numArgs], token);
         // printf("arg%d = %s\n", numArgs, args[numArgs]);
         token = strtok(NULL, " ");
         numArgs ++;
     }
+    args[numArgs] = NULL;
 
     free(lineCopy);
-    
+
     return args;
 }
 
@@ -74,7 +91,7 @@ int checkBuiltIn(const char *command)
         {
             return 1;
         }
-    } 
+    }
     return 0;
 }
 
@@ -82,36 +99,120 @@ int checkBuiltIn(const char *command)
 //need to implement later
 int checkGlob(char **args)
 {
-    char globChars[3] = {'*', '?', '['};
+    if(args == NULL){
+        return 0;
+    }
 
-    for (int i = 0; args[i] != NULL; i++)
-    {
-        for (int j = 0; j<=2; j++)
-        {
-            if (strchr(args[i], globChars[j]) == NULL)
-            {
-                // printf("globbing not present\n");
-                return 0;
-            }
+    for(int i = 1; args[i] != NULL; i++){
+        if(strchr(args[i], '*') != NULL || strchr(args[i], '?') != NULL || strchr(args[i], '[') != NULL){
+            return 1;
         }
     }
-    return 1;
+    return 0;
+
+}
+
+char **expandGlob(char **args)
+{
+    if(args == NULL){
+        return NULL;
+    }
+
+    glob_t globBuff;
+    size_t totalArgs = 0;
+
+    for(int i = 0; args[i] != NULL; i++){
+        if(i >0 && (strchr(args[i], '*') != NULL || strchr(args[i], '?') != NULL || strchr(args[i], '[') != NULL)){
+
+            memset(&globBuff, 0, sizeof(globBuff));
+
+            if(glob(args[i], GLOB_NOCHECK, NULL, &globBuff) != 0){
+                globfree(&globBuff);
+                return NULL;
+            }
+
+
+            totalArgs += globBuff.gl_pathc;
+            globfree(&globBuff);
+        }
+        else{
+            totalArgs++;
+        }
+
+    }
+
+    char **resultArgs = calloc(totalArgs + 1, sizeof(char *));
+
+    if(resultArgs == NULL){
+
+        return NULL;
+    }
+
+    size_t index = 0;
+
+    for(int i = 0; args[i] != NULL; i++){
+        if (i > 0 && (strchr(args[i], '*') != NULL || strchr(args[i], '?') != NULL || strchr(args[i], '[') != NULL)){
+            memset(&globBuff, 0, sizeof(globBuff));
+
+            if(glob(args[i], GLOB_NOCHECK, NULL, &globBuff) != 0){
+                globfree(&globBuff);
+                freeArgs(resultArgs);
+                return NULL;
+            }
+
+            for(size_t j = 0; j < globBuff.gl_pathc; j++){
+                resultArgs[index] = malloc(strlen(globBuff.gl_pathv[j]) + 1);
+                if(resultArgs[index] == NULL){
+
+                    globfree(&globBuff);
+
+                    freeArgs(resultArgs);
+
+                    return NULL;
+                }
+                strcpy(resultArgs[index], globBuff.gl_pathv[j]);
+                index++;
+            }
+            globfree(&globBuff);
+        }
+        else{
+            resultArgs[index] = malloc(strlen(args[i]) + 1);
+            if(resultArgs[index] == NULL){
+                freeArgs(resultArgs);
+                return NULL;
+            }
+            strcpy(resultArgs[index], args[i]);
+            index++;
+        }
+    }
+
+    resultArgs[index] = NULL;
+    return resultArgs;
+
+
+
 }
 
 void executeExternal(char **args)
 {
+
     if (checkGlob(args) == 0)
     {
         pid_t pid = fork();
         if (pid < 0)
         {
             perror("Failed to fork");
+            return;
         }
 
         if (pid == 0)
         {
             //child process
             execvp(args[0], args);
+            perror("myshell");
+            _exit(127);
+
+
         }
         else
         {
@@ -125,14 +226,35 @@ void executeExternal(char **args)
     }
     else
     {
-        printf("globbing not implemented yet\n");
-        
+        char **resultArgs = expandGlob(args);
+
+        if(resultArgs == NULL){
+            printf("Failed to expand glob\n");
+            return;
+        }
+        pid_t pid = fork();
+        if (pid < 0){
+            perror("Failed to fork");
+            freeArgs(resultArgs);
+            return;
+        }
+
+        if (pid == 0){
+            execvp(resultArgs[0], resultArgs);
+        }
+        else{
+            int status;
+            if(waitpid(pid, &status, 0) == -1){
+                perror("child did not return");
+            }
+        }
+        freeArgs(resultArgs);
+
     }
 }
 
 
-int executeInternal(char *command, char **args)
-{
+int executeInternal(char *command, char **args){
     if (strcmp(command, "exit") == 0)
     {
         printf("Farewell\n");
@@ -158,6 +280,20 @@ int executeInternal(char *command, char **args)
         char cwd[1024];
         getcwd(cwd, sizeof(cwd));
         printf("%s\n", cwd);
-        return 1;   
+        return 1;
     }
+    return 1;
+}
+
+void freeArgs(char **args)
+{
+    if (args == NULL)
+        return;
+
+    for (int i = 0; args[i] != NULL; i++)
+    {
+        free(args[i]);
+    }
+
+    free(args);
 }
