@@ -12,7 +12,6 @@ char *readLine()
 {
     char *line = malloc(CHAR_LIMIT);
     if (line == NULL) {
-        perror("myshell: malloc");
         exit(1);
     }
 
@@ -44,7 +43,7 @@ char **parseLine(char *line)
 
     char *token = strtok(lineCopy, " ");
 
-    char **args = calloc(ARG_LIMIT + 1, sizeof(char *));
+    char **args = malloc((ARG_LIMIT + 1) * sizeof(char *));
 
     if(args == NULL){
         free(lineCopy);
@@ -118,13 +117,12 @@ char **expandGlob(char **args)
         return NULL;
     }
 
-    glob_t globBuff;
     size_t totalArgs = 0;
 
     for(int i = 0; args[i] != NULL; i++){
         if(i >0 && (strchr(args[i], '*') != NULL || strchr(args[i], '?') != NULL || strchr(args[i], '[') != NULL)){
 
-            memset(&globBuff, 0, sizeof(globBuff));
+            glob_t globBuff = {0};
 
             if(glob(args[i], GLOB_NOCHECK, NULL, &globBuff) != 0){
                 globfree(&globBuff);
@@ -141,18 +139,21 @@ char **expandGlob(char **args)
 
     }
 
-    char **resultArgs = calloc(totalArgs + 1, sizeof(char *));
+    char **resultArgs = malloc((totalArgs + 1) * sizeof(char *));
 
     if(resultArgs == NULL){
 
         return NULL;
     }
+    resultArgs[0] = NULL;
+
 
     size_t index = 0;
 
     for(int i = 0; args[i] != NULL; i++){
         if (i > 0 && (strchr(args[i], '*') != NULL || strchr(args[i], '?') != NULL || strchr(args[i], '[') != NULL)){
-            memset(&globBuff, 0, sizeof(globBuff));
+            glob_t globBuff = {0};
+
 
             if(glob(args[i], GLOB_NOCHECK, NULL, &globBuff) != 0){
                 globfree(&globBuff);
@@ -172,6 +173,7 @@ char **expandGlob(char **args)
                 }
                 strcpy(resultArgs[index], globBuff.gl_pathv[j]);
                 index++;
+                resultArgs[index] = NULL;
             }
             globfree(&globBuff);
         }
@@ -183,6 +185,7 @@ char **expandGlob(char **args)
             }
             strcpy(resultArgs[index], args[i]);
             index++;
+            resultArgs[index] = NULL;
         }
     }
 
