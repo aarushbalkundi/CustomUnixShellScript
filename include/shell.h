@@ -21,3 +21,6 @@ char **parseLine(char *line);
 int checkBuiltIn(const char *command);
 void executeExternal(char **args);
 int executeInternal(char *command, char **args);
+int checkGlob(char **args);
+void freeArgs(char **args);
+char **expandGlob(char **args);
