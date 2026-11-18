@@ -22,8 +22,20 @@ int main()
         // printf("line read\n");
         // printf("line = %s\n", line);
 
+        // -----------------phase 2----------------------------------------------
+        char *redir = checkRedirection(line);
+
+        
+        if (redir != NULL)
+        {
+            printf("We got it : %s\n", redir);
+            continue;
+        }
+        // -----------------phase 2----------------------------------------------
+
         args = parseLine(line);
 
+        
         if( args == NULL || args[0] == NULL){
 
             free(args);

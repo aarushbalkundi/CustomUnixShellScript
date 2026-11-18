@@ -24,3 +24,7 @@ int executeInternal(char *command, char **args);
 int checkGlob(char **args);
 void freeArgs(char **args);
 char **expandGlob(char **args);
+
+
+//phase 2
+char *checkRedirection(const char *command);

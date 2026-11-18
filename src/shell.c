@@ -4,6 +4,11 @@
 
 void printPrompt()
 {
+    // char cwd[1024];
+    // getcwd(cwd, sizeof(cwd));
+    // printf("%s", cwd);
+    // // return 1 /* continue running
+    // printf("-->");
     printf("myshell--> ");
     fflush(stdout);
 }
@@ -94,6 +99,37 @@ int checkBuiltIn(const char *command)
     return 0;
 }
 
+char *checkRedirection(const char *line)
+{
+
+    for (int i = 0; i<(int)strlen(line); i++)
+    {
+        if (line[i] == '>')
+        {
+            if (i != ((int)strlen(line) -1) && (line[i+1] == '>'))
+            {
+                return ">>";
+            }
+            else
+            {
+                return ">";
+            }
+        }
+
+        if (line[i] == '<')
+        {
+            if (i != ((int)strlen(line) -1) && (line[i+1] == '<'))
+            {
+                return "<<";
+            }
+            else
+            {
+                return "<";
+            }
+        }
+    }
+    return NULL;
+}
 
 //need to implement later
 int checkGlob(char **args)
