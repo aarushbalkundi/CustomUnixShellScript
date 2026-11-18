@@ -25,10 +25,17 @@ int main()
         // -----------------phase 2----------------------------------------------
         char **redir = checkRedirection(line);
 
-        if (redir[0] != NULL)
+        // if (redir[0] != NULL)
+        // {
+        //     printf("redirection not implemented yet\n");
+        //     continue;
+        // }
+
+        int i = 0;
+        while (redir[i] != NULL)
         {
-            printf("redirection not implemented yet");
-            continue;
+            printf("found %s\n", redir[i]);
+            i++;
         }
 
 

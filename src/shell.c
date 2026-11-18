@@ -105,32 +105,49 @@ char **checkRedirection(const char *line)
 
     char **redirStrs = calloc(strlen(line) + 1, sizeof(char *));
 
-    int count = 0;
+    int countRedir = 0;
+    bool insideSingleQuote = false;
+    bool insideDoubleQuote = false;
+
+
 
     for (size_t i = 0; i < strlen(line); i++)
     {
-        if (line[i] == '>')
+        if(line[i] == '\'' && !insideDoubleQuote)
+        {
+            insideSingleQuote = !insideSingleQuote;
+        }
+        if(line[i] == '\"' && !insideSingleQuote)
+        {
+            insideDoubleQuote = !insideDoubleQuote;
+        }
+
+        if (line[i] == '>' && !insideDoubleQuote && !insideSingleQuote)
         {
             if (i + 1 < strlen(line) && line[i+1] == '>')
             {
-                redirStrs[count++] = ">>";
+                redirStrs[countRedir] = ">>";
+                countRedir++;
                 i++;
             }
             else
             {
-                redirStrs[count++] = ">";
+                redirStrs[countRedir] = ">";
+                countRedir++;
             }
         }
-        else if (line[i] == '<')
+        else if (line[i] == '<' && !insideDoubleQuote && !insideSingleQuote)
         {
             if (i + 1 < strlen(line) && line[i+1] == '<')
             {
-                redirStrs[count++] = "<<";
+                redirStrs[countRedir] = "<<";
+                countRedir++;
                 i++;
             }
             else
             {
-                redirStrs[count++] = "<";
+                redirStrs[countRedir] = "<";
+                countRedir++;
             }
         }
     }
