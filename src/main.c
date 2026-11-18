@@ -23,15 +23,17 @@ int main()
         // printf("line = %s\n", line);
 
         // -----------------phase 2----------------------------------------------
-        char *redir = checkRedirection(line);
+        char **redir = checkRedirection(line);
 
-        
-        if (redir != NULL)
+        if (redir[0] != NULL)
         {
-            printf("We got it : %s\n", redir);
+            printf("redirection not implemented yet");
             continue;
         }
+
+
         // -----------------phase 2----------------------------------------------
+        
 
         args = parseLine(line);
 

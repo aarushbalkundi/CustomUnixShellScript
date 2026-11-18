@@ -99,37 +99,47 @@ int checkBuiltIn(const char *command)
     return 0;
 }
 
-char *checkRedirection(const char *line)
+
+char **checkRedirection(const char *line)
 {
 
-    for (int i = 0; i<(int)strlen(line); i++)
+    char **redirStrs = calloc(strlen(line) + 1, sizeof(char *));
+
+    int count = 0;
+
+    for (size_t i = 0; i < strlen(line); i++)
     {
         if (line[i] == '>')
         {
-            if (i != ((int)strlen(line) -1) && (line[i+1] == '>'))
+            if (i + 1 < strlen(line) && line[i+1] == '>')
             {
-                return ">>";
+                redirStrs[count++] = ">>";
+                i++;
             }
             else
             {
-                return ">";
+                redirStrs[count++] = ">";
             }
         }
-
-        if (line[i] == '<')
+        else if (line[i] == '<')
         {
-            if (i != ((int)strlen(line) -1) && (line[i+1] == '<'))
+            if (i + 1 < strlen(line) && line[i+1] == '<')
             {
-                return "<<";
+                redirStrs[count++] = "<<";
+                i++;
             }
             else
             {
-                return "<";
+                redirStrs[count++] = "<";
             }
         }
     }
-    return NULL;
+
+    return redirStrs;
 }
+
+
+
 
 //need to implement later
 int checkGlob(char **args)

@@ -27,4 +27,4 @@ char **expandGlob(char **args);
 
 
 //phase 2
-char *checkRedirection(const char *command);
+char **checkRedirection(const char *line);
